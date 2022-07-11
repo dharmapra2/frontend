@@ -4,6 +4,16 @@ import Header from "../Component/Header";
 import "../styles/globals.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 // import "bootstrap/dist/js/bootstrap.bundle.min.js";
+import {
+  ApolloClient,
+  InMemoryCache,
+  ApolloProvider,
+} from "@apollo/client";
+
+const client = new ApolloClient({
+  uri: "http://localhost:8000/graphql",
+  cache: new InMemoryCache(),
+});
 
 function MyApp({ Component, pageProps }) {
   const router = useRouter();
@@ -15,8 +25,10 @@ function MyApp({ Component, pageProps }) {
         integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p"
         crossOrigin="anonymous"
       />
-      <Header />
-      <Component {...pageProps} />
+      <ApolloProvider client={client}>
+        <Header />
+        <Component {...pageProps} />
+      </ApolloProvider>
     </>
   );
 }

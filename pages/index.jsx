@@ -1,7 +1,52 @@
 // import Index from "Index.module.css";
+import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/router";
+import { useForm } from "react-hook-form";
 import swal from "sweetalert2";
+import { useQuery } from "@apollo/client";
+import { CHECK_LOGIN } from "../Component/Graphql/schema";
+
 function Login() {
+  const [fromData, setFromData] = useState([]);
+  const router = useRouter();
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm();
+  const onSubmit = (data) => {
+    setFromData(data);
+  };
+  const { data } = useQuery(CHECK_LOGIN, {
+    variables: { name: fromData.name, password: fromData.password },
+    onCompleted: (data) => {
+      if (data.login) {
+        localStorage.setItem("USerID", data.login.userId);
+        swal.fire("Success!", "You Succesfully login", "success");
+        setFromData([]);
+        router.push("/Home");
+      } else {
+        swal.fire({
+          icon: "error",
+          title: "Oops...",
+          text: "Invalid Cridentials!",
+        });
+      }
+      reset();
+    },
+    onError: (data) => {
+      if (fromData.length !== 0) {
+        swal.fire({
+          icon: "error",
+          title: "Oops...",
+          text: "Something went wrong!",
+        });
+      }
+    },
+  });
+
   return (
     <div className="modal-dialog">
       <div className="modal-content">
@@ -9,14 +54,14 @@ function Login() {
           <h5 className="modal-title text-center">LogIn</h5>
         </div>
         <div className="modal-body">
-          <form name="form" id="form">
+          <form name="form" id="form" onSubmit={handleSubmit(onSubmit)}>
             <div className="mb-3">
               <input
                 type="text"
                 name="name"
                 className="form-control form-control-sm"
                 placeholder="Username"
-                required
+                {...register("name", { required: true })}
               />
             </div>
             <div className="mb-3">
@@ -25,7 +70,7 @@ function Login() {
                 name="password"
                 className="form-control form-control-sm"
                 placeholder="Password"
-                required
+                {...register("password", { required: true })}
               />
             </div>
             <div className="mb-3">

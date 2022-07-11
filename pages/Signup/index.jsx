@@ -1,14 +1,32 @@
 import Link from "next/Link";
 import { useForm } from "react-hook-form";
+import { useMutation } from "@apollo/client";
+import { CREATE_ACCOUNT } from "../../Component/Graphql/schema";
 import swal from "sweetalert2";
 function Signup() {
   const {
     register,
     handleSubmit,
+    reset,
     formState: { errors },
   } = useForm();
-  const onSubmit = (data) => console.log(data);
+  const onSubmit = (data) => {
+    createUser({ variables: { name: data.name, password: data.password } });
+  };
 
+  const [createUser, { loading, error, data }] = useMutation(CREATE_ACCOUNT, {
+    onCompleted: (data) => {
+      reset();
+      swal.fire("Success!", "Your account has created.", "success");
+    },
+    onError: (data) => {
+      Swal.fire({
+        icon: "error",
+        title: "Oops...",
+        text: "Something went wrong!",
+      });
+    },
+  });
   return (
     <div className="modal-dialog mt-4">
       <div className="modal-content">
